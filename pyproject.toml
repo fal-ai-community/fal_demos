@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+version_file = "fal_demos/_version.py"
+fallback_version = "0.0.0"
+
+[project]
+name = "fal_demos"
+dynamic = ["version"]
+description = "Examples of building with Fal's SDK"
+readme = "README.md"
+dependencies = [
+    "pydantic<2.0,>=1.8",
+    "pyyaml",
+    "fal @ git+https://github.com/fal-ai/fal.git#subdirectory=projects/fal"
+]
+
+[tool.fal.apps]
+sana = { auth = "shared", ref = "fal_demos/image/sana.py::Sana", no_scale=true }
+kokoro = { auth = "shared", ref = "fal_demos/tts/kokoro.py::Kokoro", no_scale=true }
+diffrhythm = { auth = "shared", ref = "fal_demos/audio/diffrhythm.py::DiffRhythm", no_scale=true }
+wan = { auth = "shared", ref = "fal_demos/video/wan.py::Wan", no_scale=true }
+hunyuan3d = {auth = "shared", ref = "fal_demos/image/hunyuan3d.py::Hunyuan3D", no_scale=true }
