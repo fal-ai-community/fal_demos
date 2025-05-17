@@ -1,22 +1,22 @@
 # Private Model Hosting Demos with Fal
 
-Welcome to the Fal Private Serverless model hosting demos! This collection of examples is designed to guide you through the process of deploying various types of machine learning models on the Fal Serverless platform. Each demo showcases different features and best practices for creating robust, scalable, and user-friendly model APIs. We will explore image generation, 3D object creation, text-to-speech synthesis, text-to-video generation, and music generation.
+Welcome to the Fal Private Serverless model hosting demos! This collection of examples is designed to guide you through the process of deploying various types of machine learning models on the fal platform. Each demo showcases different features and best practices for creating robust, scalable, and user-friendly model APIs. We will explore image generation, 3D object creation, text-to-speech synthesis, text-to-video generation, and music generation.
 
-## Core Concepts in Fal Serverless
+## Core Concepts in fal private deployments 
 
 Before diving into specific demos, let's touch upon some core concepts you'll see repeatedly:
 
-* **`fal.App`**: This is the fundamental class you'll use to define your serverless function. It encapsulates your model, its dependencies, and the inference logic. You configure aspects like `name`, `machine_type`, `requirements`, `keep_alive`, `min_concurrency`, and `max_concurrency` directly on this class.
+* **`fal.App`**: This is the fundamental class you'll use to define your app. It encapsulates your model, its dependencies, and the inference logic. You configure aspects like `name`, `machine_type`, `requirements`, `keep_alive`, `min_concurrency`, and `max_concurrency` directly on this class.
 * **Input and Output Models**: Using `pydantic.BaseModel`, you define structured inputs and outputs for your API. The `Field` object allows you to provide rich metadata like titles, descriptions, examples, and validation rules (e.g., `ge`, `le` for numerical ranges, `Literal` for specific choices). This metadata is automatically used to generate an interactive playground and OpenAPI specification for your model.
 * **`setup()` Method**: This special method within your `fal.App` class is called once when a new worker instance starts. It's the ideal place to load your models, download any necessary assets, and perform one-time initializations. This ensures that these heavy operations don't slow down individual inference requests.
 * **`@fal.endpoint()` Decorator**: This decorator is used to expose methods of your `fal.App` class as HTTP endpoints. You can define multiple endpoints within a single app, each potentially serving a different variant or functionality of your model.
 * **Requirements**: You specify your Python package dependencies in a `requirements` list within the `fal.App` class. It's crucial to pin package versions (e.g., `torch==2.6.0`) and even commit hashes for dependencies installed from Git repositories to ensure consistent and reproducible environments.
-* **Machine Types**: Fal Serverless offers various machine types (e.g., `GPU-H100`, `M` for CPU-medium). You select the appropriate `machine_type` in your `fal.App` configuration based on your model's computational needs.
+* **Machine Types**: fal offers various machine types (e.g., `GPU-H100`, `M` for CPU-medium). You select the appropriate `machine_type` in your `fal.App` configuration based on your model's computational needs.
 * **Billing**: For many models, especially generative ones, you might want to implement custom billing logic. This can often be done by setting the `x-fal-billable-units` header in the `fastapi.Response` object. The actual cost per unit is configured in your Fal dashboard.
 * **Error Handling**: Fal provides `FieldException` for input validation errors that are nicely displayed in the UI, and you can use FastAPI's `HTTPException` for other types of errors.
 * **`fal.toolkit`**: This toolkit provides helpful utilities for common tasks, such as image handling (`Image`, `ImageSizeInput`), file operations (`File`), and more.
-* **Secrets Management**: For sensitive information like API keys, Fal Serverless allows you to set secrets (e.g., via `fal secrets set MY_SECRET_KEY <value>`) which can then be accessed as environment variables within your app.
-* **Custom Docker Images**: For complex dependencies that go beyond Python packages (e.g., system libraries via `apt-get`), Fal Serverless supports deploying applications using custom Docker images.
+* **Secrets Management**: For sensitive information like API keys, fal allows you to set secrets (e.g., via `fal secrets set MY_SECRET_KEY <value>`) which can then be accessed as environment variables within your app.
+* **Custom Docker Images**: For complex dependencies that go beyond Python packages (e.g., system libraries via `apt-get`), fal supports deploying applications using custom Docker images.
 
 Now, let's explore each demo in detail.
 
@@ -29,7 +29,7 @@ The [`fal_demos/image/sana.py`](fal_demos/image/sana.py) demo showcases how to h
 **Overview**:
 This application provides two endpoints for generating images from text prompts: a standard quality endpoint and a "sprint" endpoint optimized for faster generation with fewer inference steps.
 
-**Key Fal Serverless Concepts Demonstrated**:
+**Key fal Concepts Demonstrated**:
 
 The definition of input data structures is a crucial first step. The `BaseInput` class, found at [`fal_demos/image/sana.py#L13`](fal_demos/image/sana.py#L13), serves as a common foundation for image generation parameters. Each field, like `prompt` ([`fal_demos/image/sana.py#L15`](fal_demos/image/sana.py#L15)) or `num_inference_steps` ([`fal_demos/image/sana.py#L31`](fal_demos/image/sana.py#L31)), is meticulously defined using `pydantic.Field`, complete with titles, descriptions, and illustrative examples. This attention to detail significantly enhances the usability of the auto-generated API playground. For instance, the `image_size` field ([`fal_demos/image/sana.py#L26`](fal_demos/image/sana.py#L26)) utilizes `ImageSizeInput` from `fal.toolkit.image`, which is then converted to an `ImageSize` object internally.
 
@@ -60,7 +60,7 @@ The [`fal_demos/image/hunyuan3d.py`](fal_demos/image/hunyuan3d.py) demo illustra
 **Overview**:
 This application takes an input image URL and parameters, submits a job to an internal Hunyuan3D model on Fal, and then streams back the results, including the generated 3D object file.
 
-**Key Fal Serverless Concepts Demonstrated**:
+**Key fal Concepts Demonstrated**:
 
 The input parameters for the 3D generation are defined in the `Hunyuan3DInput` model ([`fal_demos/image/hunyuan3d.py#L9`](fal_demos/image/hunyuan3d.py#L9)), including the `input_image_url`, whether to generate a `textured_mesh`, and other model-specific settings. The `ObjectOutput` model ([`fal_demos/image/hunyuan3d.py#L49`](fal_demos/image/hunyuan3d.py#L49)) describes the expected output, primarily a `File` object representing the 3D mesh.
 
@@ -83,7 +83,7 @@ The [`fal_demos/tts/kokoro.py`](fal_demos/tts/kokoro.py) demo focuses on hosting
 **Overview**:
 This application provides several TTS endpoints, each tailored for a specific language or accent (American English, British English, Japanese). Users provide text and select a voice, and the app generates an audio file.
 
-**Key Fal Serverless Concepts Demonstrated**:
+**Key fal Concepts Demonstrated**:
 
 To cater to different languages and their specific voices, multiple Pydantic input models are defined: `AmEnglishRequest` ([`fal_demos/tts/kokoro.py#L9`](fal_demos/tts/kokoro.py#L9)), `BrEnglishRequest` ([`fal_demos/tts/kokoro.py#L48`](fal_demos/tts/kokoro.py#L48)), and `JapaneseRequest` ([`fal_demos/tts/kokoro.py#L71`](fal_demos/tts/kokoro.py#L71)). A notable feature here is the use of `typing.Literal` for the `voice` field in each request model (e.g., [`fal_demos/tts/kokoro.py#L21`](fal_demos/tts/kokoro.py#L21)). This restricts the input to a predefined set of valid voice IDs, providing clear options to the user and simplifying validation. Corresponding output models (`AmEngOutput` ([`fal_demos/tts/kokoro.py#L92`](fal_demos/tts/kokoro.py#L92)), `BrEngOutput`, `JapaneseOutput`) define the structure of the response, which includes an `audio` field of type `fal.toolkit.File`.
 
@@ -108,7 +108,7 @@ The [`fal_demos/video/wan.py`](fal_demos/video/wan.py) demo tackles a more compl
 **Overview**:
 This application allows users to generate short video clips from text prompts using the Wan 2.1 model (1.3B version). It includes optional safety checks and prompt expansion features.
 
-**Key Fal Serverless Concepts Demonstrated**:
+**Key fal Concepts Demonstrated**:
 
 The `WanT2VRequest` input model ([`fal_demos/video/wan.py#L10`](fal_demos/video/wan.py#L10)) defines parameters such as `prompt`, `negative_prompt`, `aspect_ratio`, and controls for enabling `enable_safety_checker` and `enable_prompt_expansion`. The `WanT2VResponse` model ([`fal_demos/video/wan.py#L67`](fal_demos/video/wan.py#L67)) specifies that the output will be a `video` (as a `File` object) and the `seed` used.
 
@@ -131,7 +131,7 @@ The [`fal_demos/audio/diffrhythm.py`](fal_demos/audio/diffrhythm.py) demo illust
 **Overview**:
 This application takes lyrics (with timestamps), an optional reference audio URL or style prompt, and other parameters to generate a piece of music using the DiffRhythm model.
 
-**Key Fal Serverless Concepts Demonstrated**:
+**Key fal Concepts Demonstrated**:
 
 The `TextToMusicInput` model ([`fal_demos/audio/diffrhythm.py#L11`](fal_demos/audio/diffrhythm.py#L11)) defines the inputs. The `lyrics` field is notable for its example, which shows a structured format with timestamps, and for its `ui` hint ([`fal_demos/audio/diffrhythm.py#L34`](fal_demos/audio/diffrhythm.py#L34)) suggesting a `textarea` for better user experience in the playground. The `reference_audio_url` also has a `ui={"important": True}` hint ([`fal_demos/audio/diffrhythm.py#L44`](fal_demos/audio/diffrhythm.py#L44)) to prioritize it in the UI. The `Output` model is straightforward, expecting an `audio` `File` ([`fal_demos/audio/diffrhythm.py#L72`](fal_demos/audio/diffrhythm.py#L72)).
 
@@ -153,4 +153,4 @@ The primary endpoint `/` is defined at [`fal_demos/audio/diffrhythm.py#L274`](fa
 
 ---
 
-These demos provide a solid foundation for understanding how to deploy a wide variety of models on Fal Serverless. By studying them, you can learn how to structure your applications, manage dependencies, handle inputs and outputs effectively, and leverage the platform's features to build powerful and scalable AI services. Remember to consult the official [Fal documentation](docs.fal.ai) for more in-depth information on any of the concepts discussed.
+These demos provide a solid foundation for understanding how to deploy a wide variety of models on fal. By studying them, you can learn how to structure your applications, manage dependencies, handle inputs and outputs effectively, and leverage the platform's features to build powerful and scalable AI services. Remember to consult the official [Fal documentation](docs.fal.ai) for more in-depth information on any of the concepts discussed.
